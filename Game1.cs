@@ -33,7 +33,8 @@ namespace Final_project
         Rectangle backgroundRect;
         Texture2D greybirdTexture;
         Vector2 greySpeed;
-        Rectangle greyRect;
+        Vector2 birdLocation;
+        Rectangle birdRect;
         
        Texture2D greybird2Texture;
         Vector2 grey1Speed;
@@ -65,17 +66,15 @@ namespace Final_project
         SoundEffect currentaudioEffect;
         SpriteFont SpriteFont;
 
-        float gravity ;
-        float yVelocity = 0f;
-        float birdSpeed;
-        float birdVelocity;
-        //float birdVelocityY = 0;
+        float gravity = 0.3f;
+        float birdVelocity = -2;
+      
         List<Vector2> pipes = new List<Vector2>();
         float pipeSpeed = 3f;
         Random rand = new Random();
         int score = 0;
         
-        float VelocityY = 2f;
+
         MouseState mouseState;
         KeyboardState keyboardState;
 
@@ -98,8 +97,8 @@ namespace Final_project
             backgroundRect = new Rectangle(0, 0, 700, 500);
             //greenRect = new Rectangle(120, 0, 100, 100);
             //green1Rect = new Rectangle(500, 150, 150, 150);
-            
-            greyRect = new Rectangle(100, 200, 50, 50);
+            birdLocation = new Vector2(100, 200);
+            birdRect = new Rectangle(100, 200, 50, 50);
             greySpeed = new Vector2(100, GraphicsDevice.Viewport.Height/2);
             //grey1Rect = new Rectangle(500, 150, 150, 150);
             //pinkRect = new Rectangle(500, 150, 150, 150);
@@ -140,38 +139,29 @@ namespace Final_project
         {
 
             mouseState = Mouse.GetState();
-            this.Window.Title = "x = " + mouseState.X + ", y = " + Mouse.GetState().Y;
-            KeyboardState state = Keyboard.GetState();
+            //this.Window.Title = "x = " + mouseState.X + ", y = " + Mouse.GetState().Y;
+            this.Window.Title = birdVelocity.ToString();
+            keyboardState = Keyboard.GetState();
 
-            //if (keyboardState.IsKeyDown(Keys.Space))
-            //{
-            //    birdSpeed = -6f;
-            //}
-            //birdVelocity += 0.4f;
-            //greyRect.Y += (int)greySpeed.Y;
-
+          
             //for (int i = 0; ; i < pipes.Count; int++)
             //{
             //    pipes[i] = new Vector2(pipes[i].X - pipeSpeed, pipes[i].Y);
             //    Rectangle pipeRect = new Rectangle
             //})
-            //VelocityY += gravity;
-            //greybirdTexture.Y += VelocityY;
+        
             //float dt  = (float)gameTime.ElapsedGameTime.TotalSeconds;
             ////birdSpeed = new Vector2(
-            //if (keyboardState.IsKeyDown(Keys.Space))
-            //{
+           
 
-            //}
-
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
               
             if (keyboardState.IsKeyDown(Keys.Space))
             {
-                VelocityY = -10;
+                birdVelocity = -10f;
             }
-            yVelocity += gravity;
-            greyRect.Y += (int)VelocityY;
+            birdVelocity += gravity;
+            birdLocation.Y += birdVelocity;
+            birdRect.Location = birdLocation.ToPoint();
 
             //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             //Exit();
@@ -187,7 +177,7 @@ namespace Final_project
             _spriteBatch.Begin();
             if (screen == Screen.intro)
               
-            _spriteBatch.Draw(greybirdTexture, greyRect, Color.White);
+            _spriteBatch.Draw(greybirdTexture, birdRect, Color.White);
             _spriteBatch.Draw(greenpipeTexture, greenpipeRect, Color.White);
             _spriteBatch.End();
             // TODO: Add your drawing code here
