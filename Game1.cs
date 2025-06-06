@@ -65,6 +65,8 @@ namespace Final_project
         SoundEffect currentaudioEffect;
         SpriteFont SpriteFont;
 
+        float gravity ;
+        float yVelocity = 0f;
         float birdSpeed;
         float birdVelocity;
         //float birdVelocityY = 0;
@@ -72,8 +74,8 @@ namespace Final_project
         float pipeSpeed = 3f;
         Random rand = new Random();
         int score = 0;
-        float gravity = 1;
-        float VelocityY = 1;
+        
+        float VelocityY = 2f;
         MouseState mouseState;
         KeyboardState keyboardState;
 
@@ -97,7 +99,7 @@ namespace Final_project
             //greenRect = new Rectangle(120, 0, 100, 100);
             //green1Rect = new Rectangle(500, 150, 150, 150);
             
-            greyRect = new Rectangle(45, 150, 50, 50);
+            greyRect = new Rectangle(100, 200, 50, 50);
             greySpeed = new Vector2(100, GraphicsDevice.Viewport.Height/2);
             //grey1Rect = new Rectangle(500, 150, 150, 150);
             //pinkRect = new Rectangle(500, 150, 150, 150);
@@ -153,16 +155,26 @@ namespace Final_project
             //    pipes[i] = new Vector2(pipes[i].X - pipeSpeed, pipes[i].Y);
             //    Rectangle pipeRect = new Rectangle
             //})
-            VelocityY += gravity;
-            greybirdTexture.Y += VelocityY;
-            float dt  = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            //birdSpeed = new Vector2(
+            //VelocityY += gravity;
+            //greybirdTexture.Y += VelocityY;
+            //float dt  = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            ////birdSpeed = new Vector2(
+            //if (keyboardState.IsKeyDown(Keys.Space))
+            //{
+
+            //}
+
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+              
             if (keyboardState.IsKeyDown(Keys.Space))
             {
-
+                VelocityY = -10;
             }
-                if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+            yVelocity += gravity;
+            greyRect.Y += (int)VelocityY;
+
+            //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            //Exit();
 
             // TODO: Add your update logic here
 
