@@ -69,7 +69,9 @@ namespace Final_project
         float gravity = 0.3f;
         float birdVelocity = -2;
       
-        List<Vector2> pipes = new List<Vector2>();
+        //List<Vector2> pipes = new List<Vector2>();
+        List<Rectangle> pipes = new List<Rectangle>();
+        
         float pipeSpeed = 3f;
         Random rand = new Random();
         int score = 0;
@@ -167,7 +169,11 @@ namespace Final_project
             //Exit();
 
             // TODO: Add your update logic here
+            if (birdLocation.Y < 0)
+            birdLocation.Y = 0;
 
+            if (birdLocation.Y + birdRect.Height > window.Height)
+                birdLocation.Y= window.Height - birdRect.Height;
             base.Update(gameTime);
         }
 
