@@ -36,25 +36,25 @@ namespace Final_project
         Vector2 birdLocation;
         Rectangle birdRect;
         
-       Texture2D greybird2Texture;
-        Vector2 grey1Speed;
-        Rectangle grey1Rect;
+       //Texture2D greybird2Texture;
+       // Vector2 grey1Speed;
+       // Rectangle grey1Rect;
 
-        Texture2D greenbirdTexture;
-        Vector2 greenSpeed;
-        Rectangle greenRect;
+       // Texture2D greenbirdTexture;
+       // Vector2 greenSpeed;
+       // Rectangle greenRect;
 
-        Texture2D greenbird2Teture;
-        Vector2 green1Speed;
-        Rectangle green1Rect;
+       // Texture2D greenbird2Teture;
+       // Vector2 green1Speed;
+       // Rectangle green1Rect;
 
-        Texture2D pinkbirdTexture;
-        Vector2 pinkSpeed;
-        Rectangle pinkRect;
+       // Texture2D pinkbirdTexture;
+       // Vector2 pinkSpeed;
+       // Rectangle pinkRect;
 
-        Texture2D pinkbird2Texture;
-        Vector2 pink1Speed;
-        Rectangle pink1Rect;
+       // Texture2D pinkbird2Texture;
+       // Vector2 pink1Speed;
+       // Rectangle pink1Rect;
 
         Texture2D goldTexture;
         Vector2 goldSpeed;
