@@ -70,6 +70,7 @@ namespace Final_project
         //SoundEffect dieEffect;
         // SoundEffect collectEffect;
         //SoundEffect currentaudioEffect;
+        
         SpriteFont SpriteFont;
 
         float gravity = 0.5f;
@@ -79,9 +80,12 @@ namespace Final_project
         //List<Rectangle> pipes;
         List<Rectangle> topPipes;
         List<Rectangle> bottomPipes;
-        //List<Rectangle>
+        List<Rectangle> goldFeather;
+
 
         float pipeSpeed = 3;
+        int extralives = 0;
+        float feathertimer;
         Random rand = new Random();
         int score = 0;
         float pipetimer; // -> counting real time to spawn the pipes
@@ -122,11 +126,13 @@ namespace Final_project
 
             topPipes = new List<Rectangle>();
             bottomPipes = new List<Rectangle>();
-            base.Initialize();
-            //currentbackgroundTexture = dayTexture;
-        
+            goldFeather = new List<Rectangle>();
 
-            
+            base.Initialize();
+            currentbackgroundTexture = dayTexture;
+
+
+
         }
 
         protected override void LoadContent()
@@ -175,6 +181,7 @@ namespace Final_project
 
            if ( screen == Screen.screen1);
             {
+                currentbackgroundTexture = dayTexture;
                 if (keyboardState.IsKeyDown(Keys.Space))
                 {
                     birdVelocity = -8f;
@@ -203,7 +210,17 @@ namespace Final_project
 
                     topPipes.Add(topPipe);
                     bottomPipes.Add(bottomPipe);
+                    pipetimer = 0f;
                 }
+                 
+                if (feathertimer >= 10f)
+                {
+
+                    Rectangle goldFeather = new Rectangle(565, 0, 25, 25);
+                    //goldFeather.Add(goldFeather);
+                    
+               }
+                
 
                 for (int i = topPipes.Count - 1; i >= 0; i--)
                 {
