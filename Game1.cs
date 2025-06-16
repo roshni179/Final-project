@@ -12,7 +12,7 @@ namespace Final_project
         enum Screen
         {
             intro,
-            //screen1,
+            screen1,
             //screen2,
             End
         }    
@@ -27,7 +27,8 @@ namespace Final_project
         Rectangle buttonRect;
         Texture2D dayTexture;
         Texture2D nightTexture;
-        Texture2D greenpipeTexture;
+        Texture2D toppipeTexture;
+        Texture2D bottompipeTexture;
         Rectangle greenpipeRect;
         Texture2D currentbackgroundTexture;
         Rectangle backgroundRect;
@@ -35,44 +36,57 @@ namespace Final_project
         Vector2 greySpeed;
         Vector2 birdLocation;
         Rectangle birdRect;
+
+
+        Texture2D gameoverTexture;
+        Rectangle gameoverRect;
+
         
        //Texture2D greybird2Texture;
-       // Vector2 grey1Speed;
-       // Rectangle grey1Rect;
+        //Vector2 grey1Speed;
+        //Rectangle grey1Rect;
 
-       // Texture2D greenbirdTexture;
-       // Vector2 greenSpeed;
-       // Rectangle greenRect;
+        //Texture2D greenbirdTexture;
+        //Vector2 greenSpeed;
+        //Rectangle greenRect;
 
-       // Texture2D greenbird2Teture;
+        //Texture2D greenbird2Teture;
        // Vector2 green1Speed;
-       // Rectangle green1Rect;
+        //Rectangle green1Rect;
 
-       // Texture2D pinkbirdTexture;
-       // Vector2 pinkSpeed;
-       // Rectangle pinkRect;
+        //Texture2D pinkbirdTexture;
+        //Vector2 pinkSpeed;
+        //Rectangle pinkRect;
 
-       // Texture2D pinkbird2Texture;
-       // Vector2 pink1Speed;
-       // Rectangle pink1Rect;
+        //Texture2D pinkbird2Texture;
+        //Vector2 pink1Speed;
+        //Rectangle pink1Rect;
 
         Texture2D goldTexture;
-        Vector2 goldSpeed;
+        //Vector2 goldSpeed;
         Rectangle goldRect;
 
         SoundEffect swooshEffect;
-        SoundEffect dieEffect;
-        SoundEffect collectEffect;
-        SoundEffect currentaudioEffect;
+        //SoundEffect dieEffect;
+        // SoundEffect collectEffect;
+        //SoundEffect currentaudioEffect;
         SpriteFont SpriteFont;
 
-        float gravity = 0.3f;
-        float birdVelocity = -2;
+        float gravity = 0.5f;
+        float birdVelocity = -3;
       
-        List<Vector2> pipes = new List<Vector2>();
-        float pipeSpeed = 3f;
+       
+        //List<Rectangle> pipes;
+        List<Rectangle> topPipes;
+        List<Rectangle> bottomPipes;
+        //List<Rectangle>
+
+        float pipeSpeed = 3;
         Random rand = new Random();
         int score = 0;
+        float pipetimer; // -> counting real time to spawn the pipes
+        //float pipeinterval = 2f;
+
         
 
         MouseState mouseState;
@@ -94,22 +108,25 @@ namespace Final_project
             _graphics.PreferredBackBufferHeight = window.Height;
             _graphics.ApplyChanges();
 
-            backgroundRect = new Rectangle(0, 0, 700, 500);
+            backgroundRect = new Rectangle(0, 0, 700, 450);
             //greenRect = new Rectangle(120, 0, 100, 100);
             //green1Rect = new Rectangle(500, 150, 150, 150);
             birdLocation = new Vector2(100, 200);
-            birdRect = new Rectangle(100, 200, 50, 50);
+            birdRect = new Rectangle(100, 200, 40, 40);
             greySpeed = new Vector2(100, GraphicsDevice.Viewport.Height/2);
             //grey1Rect = new Rectangle(500, 150, 150, 150);
             //pinkRect = new Rectangle(500, 150, 150, 150);
             //pink1Rect = new Rectangle(500, 150, 150, 150);
-            greenpipeRect = new Rectangle();
+            greenpipeRect = new Rectangle(350,150,10,10);
+            buttonRect = new Rectangle(160, 220, 160, 50);
 
-
-
+            topPipes = new List<Rectangle>();
+            bottomPipes = new List<Rectangle>();
             base.Initialize();
-            //currentbackgroundTexture = startscreenTexture;
+            //currentbackgroundTexture = dayTexture;
+        
 
+            
         }
 
         protected override void LoadContent()
@@ -124,8 +141,10 @@ namespace Final_project
             //greenbird2Teture = Content.Load<Texture2D>("greenbird2");
             //pinkbirdTexture = Content.Load<Texture2D>("pinkbird");
             //pinkbird2Texture = Content.Load<Texture2D>("pinkbird2");
-            greenpipeTexture = Content.Load<Texture2D>("greenpipe");
+            toppipeTexture = Content.Load<Texture2D>("top");       
+            bottompipeTexture = Content.Load<Texture2D>("bottom");
             startscreenTexture = Content.Load<Texture2D>("startscreen");
+            gameoverTexture = Content.Load<Texture2D>("crashed image");
 
             //swooshEffect = Content.Load<SoundEffect>("swoosh");
             //dieEffect = Content.Load<SoundEffect>("die");
@@ -138,36 +157,98 @@ namespace Final_project
         protected override void Update(GameTime gameTime)
         {
 
-            mouseState = Mouse.GetState();
-            //this.Window.Title = "x = " + mouseState.X + ", y = " + Mouse.GetState().Y;
+           
+            
             this.Window.Title = birdVelocity.ToString();
+            mouseState = Mouse.GetState();
             keyboardState = Keyboard.GetState();
 
-          
-            //for (int i = 0; ; i < pipes.Count; int++)
-            //{
-            //    pipes[i] = new Vector2(pipes[i].X - pipeSpeed, pipes[i].Y);
-            //    Rectangle pipeRect = new Rectangle
-            //})
-        
-            //float dt  = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            ////birdSpeed = new Vector2(
-           
-
-              
-            if (keyboardState.IsKeyDown(Keys.Space))
+            if (screen == Screen.intro);
             {
-                birdVelocity = -10f;
+                if (mouseState.LeftButton == ButtonState.Pressed &&
+       buttonRect.Contains(mouseState.Position))
+                {
+                    screen = Screen.screen1; 
+                }
             }
-            birdVelocity += gravity;
-            birdLocation.Y += birdVelocity;
-            birdRect.Location = birdLocation.ToPoint();
 
-            //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-            //Exit();
 
-            // TODO: Add your update logic here
+           if ( screen == Screen.screen1);
+            {
+                if (keyboardState.IsKeyDown(Keys.Space))
+                {
+                    birdVelocity = -8f;
+                    //swooshEffect.Play();
+                }
+                birdVelocity += gravity;
+                birdLocation.Y += birdVelocity;
 
+                if (birdLocation.Y < 0)
+                    birdLocation.Y = 0;
+                if (birdLocation.Y + birdRect.Height > window.Height)
+                    birdLocation.Y = window.Height - birdRect.Height;
+
+                birdRect.Location = birdLocation.ToPoint();
+                pipetimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if (pipetimer >= 3f)
+                {
+                    int gap = 150; // space between top and bottom pipe
+                    int pipeStartY = 100;
+                    int pipeEndY = 250;
+                    int topPipeHeight = rand.Next(pipeStartY, pipeEndY);
+
+                    Rectangle topPipe = new Rectangle(700, 0, toppipeTexture.Width, topPipeHeight);
+                    Rectangle bottomPipe = new Rectangle(700, topPipeHeight + gap, bottompipeTexture.Width, 450 - (topPipeHeight + gap));
+
+                    topPipes.Add(topPipe);
+                    bottomPipes.Add(bottomPipe);
+                }
+
+                for (int i = topPipes.Count - 1; i >= 0; i--)
+                {
+                    Rectangle top = topPipes[i];
+                    Rectangle bottom = bottomPipes[i];
+                    top.X -= (int)pipeSpeed;
+                    bottom.X -= (int)pipeSpeed;
+
+
+                    if (top.Right < 0)
+                    {
+                        topPipes.RemoveAt(i);
+                        bottomPipes.RemoveAt(i);
+                    }
+                    else
+                    {
+                        topPipes[i] = top;
+                        bottomPipes[i] = bottom;
+                    }
+                }
+
+
+                foreach (var top in topPipes)
+                {
+                    if (birdRect.Intersects(top))
+                    {
+                        
+                        currentbackgroundTexture = gameoverTexture;
+
+                    }
+                }
+
+                // Collision with bottom pipes
+                foreach (var bottom in bottomPipes)
+                {
+                    if (birdRect.Intersects(bottom))
+                    {
+                        currentbackgroundTexture = gameoverTexture;
+                    }
+                }
+
+
+
+
+            }
             base.Update(gameTime);
         }
 
@@ -176,9 +257,18 @@ namespace Final_project
             GraphicsDevice.Clear(Color.CornflowerBlue);
             _spriteBatch.Begin();
             if (screen == Screen.intro)
-              
-            _spriteBatch.Draw(greybirdTexture, birdRect, Color.White);
-            _spriteBatch.Draw(greenpipeTexture, greenpipeRect, Color.White);
+                _spriteBatch.Draw(startscreenTexture, backgroundRect, Color.White);
+            if (screen == Screen.screen1)
+            {
+                _spriteBatch.Draw(dayTexture, backgroundRect, Color.White);
+                _spriteBatch.Draw(gameoverTexture, backgroundRect, Color.White);
+            }
+           
+           _spriteBatch.Draw(greybirdTexture, birdRect, Color.White);
+            foreach (var top in topPipes)
+                _spriteBatch.Draw(toppipeTexture, top, Color.White);
+            foreach (var bottom in bottomPipes)
+                _spriteBatch.Draw(bottompipeTexture, bottom, Color.White);
             _spriteBatch.End();
             // TODO: Add your drawing code here
 
