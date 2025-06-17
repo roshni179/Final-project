@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
@@ -13,7 +14,7 @@ namespace Final_project
         {
             intro,
             screen1,
-            //screen2,
+            gameover,
             End
         }    
                 
@@ -67,11 +68,11 @@ namespace Final_project
         Rectangle goldRect;
 
         SoundEffect swooshEffect;
-        //SoundEffect dieEffect;
+        SoundEffect dieEffect;
         // SoundEffect collectEffect;
         //SoundEffect currentaudioEffect;
-        
-        SpriteFont SpriteFont;
+
+        SpriteFont scoreFont;
 
         float gravity = 0.5f;
         float birdVelocity = -3;
@@ -90,11 +91,11 @@ namespace Final_project
         int score = 0;
         float pipetimer; // -> counting real time to spawn the pipes
         //float pipeinterval = 2f;
-
+        bool gameover = false;  
         
 
         MouseState mouseState;
-        KeyboardState keyboardState;
+        KeyboardState keyboardState, prevKeyboardState;
 
         public Game1()
         {
@@ -122,7 +123,9 @@ namespace Final_project
             //pinkRect = new Rectangle(500, 150, 150, 150);
             //pink1Rect = new Rectangle(500, 150, 150, 150);
             greenpipeRect = new Rectangle(350,150,10,10);
-            buttonRect = new Rectangle(160, 220, 160, 50);
+            buttonRect = new Rectangle(229,295,210,65);
+
+            
 
             topPipes = new List<Rectangle>();
             bottomPipes = new List<Rectangle>();
@@ -152,8 +155,8 @@ namespace Final_project
             startscreenTexture = Content.Load<Texture2D>("startscreen");
             gameoverTexture = Content.Load<Texture2D>("crashed image");
 
-            //swooshEffect = Content.Load<SoundEffect>("swoosh");
-            //dieEffect = Content.Load<SoundEffect>("die");
+            swooshEffect = Content.Load<SoundEffect>("swoosh");
+           // dieEffect = Content.Load<SoundEffect>("die");
             //collectEffect = Content.Load<SoundEffect>("goldcollect");
             goldTexture = Content.Load<Texture2D>("gold");
 
@@ -164,28 +167,30 @@ namespace Final_project
         {
 
            
-            
-            this.Window.Title = birdVelocity.ToString();
+            this.Window.Title ="x = " + mouseState.X + ", y = " + Mouse.GetState().Y;
+            //this.Window.Title = birdVelocity.ToString();
             mouseState = Mouse.GetState();
+            prevKeyboardState = keyboardState;
             keyboardState = Keyboard.GetState();
 
-            if (screen == Screen.intro);
+            if (screen == Screen.intro)
             {
                 if (mouseState.LeftButton == ButtonState.Pressed &&
-       buttonRect.Contains(mouseState.Position))
+                        buttonRect.Contains(mouseState.Position))
                 {
-                    screen = Screen.screen1; 
+                    screen = Screen.screen1;
+                    currentbackgroundTexture = dayTexture;
                 }
             }
 
 
-           if ( screen == Screen.screen1);
+            else if (screen == Screen.screen1)
             {
-                currentbackgroundTexture = dayTexture;
-                if (keyboardState.IsKeyDown(Keys.Space))
+
+                if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
                 {
                     birdVelocity = -8f;
-                    //swooshEffect.Play();
+                    swooshEffect.Play();
                 }
                 birdVelocity += gravity;
                 birdLocation.Y += birdVelocity;
@@ -200,27 +205,30 @@ namespace Final_project
 
                 if (pipetimer >= 3f)
                 {
+
+                    int pipeWidth = 40;
                     int gap = 150; // space between top and bottom pipe
                     int pipeStartY = 100;
                     int pipeEndY = 250;
                     int topPipeHeight = rand.Next(pipeStartY, pipeEndY);
 
-                    Rectangle topPipe = new Rectangle(700, 0, toppipeTexture.Width, topPipeHeight);
-                    Rectangle bottomPipe = new Rectangle(700, topPipeHeight + gap, bottompipeTexture.Width, 450 - (topPipeHeight + gap));
+                    Rectangle topPipe = new Rectangle(700, 0, pipeWidth, topPipeHeight);
+                    Rectangle bottomPipe = new Rectangle(700, topPipeHeight + gap, pipeWidth, 450 - (topPipeHeight + gap));
 
                     topPipes.Add(topPipe);
                     bottomPipes.Add(bottomPipe);
                     pipetimer = 0f;
                 }
-                 
+
                 if (feathertimer >= 10f)
                 {
 
                     Rectangle goldFeather = new Rectangle(565, 0, 25, 25);
                     //goldFeather.Add(goldFeather);
-                    
-               }
-                
+                    feathertimer = 0f;
+
+                }
+
 
                 for (int i = topPipes.Count - 1; i >= 0; i--)
                 {
@@ -242,13 +250,13 @@ namespace Final_project
                     }
                 }
 
-
                 foreach (var top in topPipes)
                 {
                     if (birdRect.Intersects(top))
                     {
-                        
-                        currentbackgroundTexture = gameoverTexture;
+
+                        screen = Screen.gameover;
+                        dieEffect.Play();
 
                     }
                 }
@@ -258,14 +266,21 @@ namespace Final_project
                 {
                     if (birdRect.Intersects(bottom))
                     {
-                        currentbackgroundTexture = gameoverTexture;
+                        screen = Screen.gameover;
+                       // dieEffect.Play();
                     }
                 }
-
-
-
+            }
+            else if (screen == Screen.gameover)
+            {
 
             }
+                
+
+
+
+
+            
             base.Update(gameTime);
         }
 
@@ -275,17 +290,24 @@ namespace Final_project
             _spriteBatch.Begin();
             if (screen == Screen.intro)
                 _spriteBatch.Draw(startscreenTexture, backgroundRect, Color.White);
-            if (screen == Screen.screen1)
+            else if (screen == Screen.screen1)
             {
-                _spriteBatch.Draw(dayTexture, backgroundRect, Color.White);
-                _spriteBatch.Draw(gameoverTexture, backgroundRect, Color.White);
+
+               
+             
+                    _spriteBatch.Draw(dayTexture, backgroundRect, Color.White);
+
+               
+                _spriteBatch.Draw(greybirdTexture, birdRect, Color.White);
+                foreach (var top in topPipes)
+                    _spriteBatch.Draw(toppipeTexture, top, Color.White);
+                foreach (var bottom in bottomPipes)
+                    _spriteBatch.Draw(bottompipeTexture, bottom, Color.White);
+
             }
-           
-           _spriteBatch.Draw(greybirdTexture, birdRect, Color.White);
-            foreach (var top in topPipes)
-                _spriteBatch.Draw(toppipeTexture, top, Color.White);
-            foreach (var bottom in bottomPipes)
-                _spriteBatch.Draw(bottompipeTexture, bottom, Color.White);
+            else if (screen == Screen.gameover)          
+                    _spriteBatch.Draw(gameoverTexture, backgroundRect, Color.White);
+
             _spriteBatch.End();
             // TODO: Add your drawing code here
 
