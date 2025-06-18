@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Pipes;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -37,7 +38,8 @@ namespace Final_project
         Vector2 greySpeed;
         Vector2 birdLocation;
         Rectangle birdRect;
-
+        Rectangle restartRect;
+        Rectangle exitRect;
 
         Texture2D gameoverTexture;
         Rectangle gameoverRect;
@@ -63,9 +65,9 @@ namespace Final_project
         //Vector2 pink1Speed;
         //Rectangle pink1Rect;
 
-        Texture2D goldTexture;
+        Texture2D featherTexture;
         //Vector2 goldSpeed;
-        Rectangle goldRect;
+        Rectangle featherRect;
 
         SoundEffect swooshEffect;
         SoundEffect dieEffect;
@@ -81,16 +83,16 @@ namespace Final_project
         //List<Rectangle> pipes;
         List<Rectangle> topPipes;
         List<Rectangle> bottomPipes;
-        List<Rectangle> goldFeather;
+        List<Rectangle> feathers;
 
 
         float pipeSpeed = 3;
         int extralives = 0;
-        float feathertimer;
+        float feathertimer = 0f;
         Random rand = new Random();
         int score = 0;
         float pipetimer; // -> counting real time to spawn the pipes
-        //float pipeinterval = 2f;
+       
         bool gameover = false;  
         
 
@@ -124,12 +126,13 @@ namespace Final_project
             //pink1Rect = new Rectangle(500, 150, 150, 150);
             greenpipeRect = new Rectangle(350,150,10,10);
             buttonRect = new Rectangle(229,295,210,65);
-
+            restartRect = new Rectangle(34,296,194,53);
+           exitRect = new Rectangle(62,372,136,88);
             
 
             topPipes = new List<Rectangle>();
             bottomPipes = new List<Rectangle>();
-            goldFeather = new List<Rectangle>();
+            feathers = new List<Rectangle>();
 
             base.Initialize();
             currentbackgroundTexture = dayTexture;
@@ -153,12 +156,12 @@ namespace Final_project
             toppipeTexture = Content.Load<Texture2D>("top");       
             bottompipeTexture = Content.Load<Texture2D>("bottom");
             startscreenTexture = Content.Load<Texture2D>("startscreen");
-            gameoverTexture = Content.Load<Texture2D>("crashed image");
+            gameoverTexture = Content.Load<Texture2D>("crashed");
 
             swooshEffect = Content.Load<SoundEffect>("swoosh");
-           // dieEffect = Content.Load<SoundEffect>("die");
+           dieEffect = Content.Load<SoundEffect>("die");
             //collectEffect = Content.Load<SoundEffect>("goldcollect");
-            goldTexture = Content.Load<Texture2D>("gold");
+            featherTexture = Content.Load<Texture2D>("gold");
 
             // TODO: use this.Content to load your game content here
         }
@@ -203,13 +206,14 @@ namespace Final_project
                 birdRect.Location = birdLocation.ToPoint();
                 pipetimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-                if (pipetimer >= 3f)
+                if (pipetimer >= 2f)
                 {
 
                     int pipeWidth = 40;
-                    int gap = 150; // space between top and bottom pipe
+                   // space between top and bottom pipe
                     int pipeStartY = 100;
                     int pipeEndY = 250;
+                    int gap = rand.Next(pipeStartY, pipeEndY);
                     int topPipeHeight = rand.Next(pipeStartY, pipeEndY);
 
                     Rectangle topPipe = new Rectangle(700, 0, pipeWidth, topPipeHeight);
@@ -220,11 +224,11 @@ namespace Final_project
                     pipetimer = 0f;
                 }
 
+                feathertimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
                 if (feathertimer >= 10f)
                 {
-
-                    Rectangle goldFeather = new Rectangle(565, 0, 25, 25);
-                    //goldFeather.Add(goldFeather);
+                    
                     feathertimer = 0f;
 
                 }
@@ -255,8 +259,9 @@ namespace Final_project
                     if (birdRect.Intersects(top))
                     {
 
-                        screen = Screen.gameover;
                         dieEffect.Play();
+                        screen = Screen.gameover;
+
 
                     }
                 }
@@ -266,8 +271,9 @@ namespace Final_project
                 {
                     if (birdRect.Intersects(bottom))
                     {
+                        dieEffect.Play();
                         screen = Screen.gameover;
-                       // dieEffect.Play();
+                       
                     }
                 }
             }
