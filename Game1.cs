@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.IO.Pipes;
+using System.Net;
 using System.Security.Cryptography.X509Certificates;
+using System.Xml.Serialization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
@@ -85,16 +88,16 @@ namespace Final_project
         List<Rectangle> bottomPipes;
         List<Rectangle> feathers;
 
-
+        int feather = 0;
         float pipeSpeed = 3;
         int extralives = 0;
         float feathertimer = 0f;
         Random rand = new Random();
-        int score = 0;
+        int score;
         float pipetimer; // -> counting real time to spawn the pipes
        
         bool gameover = false;  
-        
+        bool collided = false;
 
         MouseState mouseState;
         KeyboardState keyboardState, prevKeyboardState;
@@ -110,6 +113,7 @@ namespace Final_project
         {
             window = new Rectangle(0, 0, 700, 450);
             // TODO: Add your initialization logic here
+            int score = 0;
             screen = Screen.intro;
             _graphics.PreferredBackBufferWidth = window.Width;
             _graphics.PreferredBackBufferHeight = window.Height;
@@ -128,7 +132,7 @@ namespace Final_project
             buttonRect = new Rectangle(229,295,210,65);
             restartRect = new Rectangle(34,296,194,53);
            exitRect = new Rectangle(62,372,136,88);
-            
+            featherRect = new Rectangle(100,200,30,30);
 
             topPipes = new List<Rectangle>();
             bottomPipes = new List<Rectangle>();
@@ -162,6 +166,7 @@ namespace Final_project
            dieEffect = Content.Load<SoundEffect>("die");
             //collectEffect = Content.Load<SoundEffect>("goldcollect");
             featherTexture = Content.Load<Texture2D>("gold");
+            scoreFont = Content.Load<SpriteFont>("scoreFont");
 
             // TODO: use this.Content to load your game content here
         }
@@ -210,7 +215,7 @@ namespace Final_project
                 {
 
                     int pipeWidth = 40;
-                   // space between top and bottom pipe
+                    // space between top and bottom pipe
                     int pipeStartY = 100;
                     int pipeEndY = 250;
                     int gap = rand.Next(pipeStartY, pipeEndY);
@@ -228,67 +233,106 @@ namespace Final_project
 
                 if (feathertimer >= 10f)
                 {
-                    
-                    feathertimer = 0f;
+                    featherRect.X -= (int)pipeSpeed;
+                    if (featherRect.Right < 0)
+                    {
+                        featherRect.X = 800; //the size
+                        featherRect.Y = rand.Next(50, 350); //random y positon)
+                    }
+                    if (birdRect.Intersects(featherRect))
+                    {
+                        feather++;
+                        featherRect.X = 800;
+                        featherRect.Y = rand.Next(50, 350);
+
+                        feathertimer = 0f;
+
+                    }
+                 
+
+
+                    for (int i = topPipes.Count - 1; i >= 0; i--)
+                    {
+                        Rectangle top = topPipes[i];
+                        Rectangle bottom = bottomPipes[i];
+                        top.X -= (int)pipeSpeed;
+                        bottom.X -= (int)pipeSpeed;
+
+
+                        if (top.Right < 0)
+                        {
+                            topPipes.RemoveAt(i);
+                            bottomPipes.RemoveAt(i);
+
+                            score = score + 1;
+                        }
+                        else
+                        {
+                            topPipes[i] = top;
+                            bottomPipes[i] = bottom;
+                        }
+
+
+
+
+                    }
+
+
+                    foreach (var top in topPipes)
+                    {
+                        if (birdRect.Intersects(top))
+                        {
+                            score = 0;
+                            dieEffect.Play();
+                            screen = Screen.gameover;
+
+
+                        }
+                    }
+
+
+                    foreach (var bottom in bottomPipes)
+                    {
+                        if (birdRect.Intersects(bottom))
+                        {
+                            score = 0;
+                            dieEffect.Play();
+                            screen = Screen.gameover;
+
+                        }
+                    }
 
                 }
-
-
-                for (int i = topPipes.Count - 1; i >= 0; i--)
+                else if (screen == Screen.gameover)
                 {
-                    Rectangle top = topPipes[i];
-                    Rectangle bottom = bottomPipes[i];
-                    top.X -= (int)pipeSpeed;
-                    bottom.X -= (int)pipeSpeed;
-
-
-                    if (top.Right < 0)
+                    if (mouseState.LeftButton == ButtonState.Pressed &&
+                           restartRect.Contains(mouseState.Position))
                     {
-                        topPipes.RemoveAt(i);
-                        bottomPipes.RemoveAt(i);
+                        screen = Screen.intro;
+                        pipetimer = 0f;
+
+
+
+                        topPipes.Clear();
+                        bottomPipes.Clear();
+
+
                     }
                     else
                     {
-                        topPipes[i] = top;
-                        bottomPipes[i] = bottom;
-                    }
-                }
-
-                foreach (var top in topPipes)
-                {
-                    if (birdRect.Intersects(top))
-                    {
-
-                        dieEffect.Play();
-                        screen = Screen.gameover;
-
+                        if (mouseState.LeftButton == ButtonState.Pressed &&
+                            exitRect.Contains(mouseState.Position))
+                        {
+                            Exit();
+                        }
 
                     }
                 }
-
-                // Collision with bottom pipes
-                foreach (var bottom in bottomPipes)
-                {
-                    if (birdRect.Intersects(bottom))
-                    {
-                        dieEffect.Play();
-                        screen = Screen.gameover;
-                       
-                    }
-                }
-            }
-            else if (screen == Screen.gameover)
-            {
 
             }
-                
 
-
-
-
-            
-            base.Update(gameTime);
-        }
+                base.Update(gameTime);
+            }
 
         protected override void Draw(GameTime gameTime)
         {
@@ -309,10 +353,12 @@ namespace Final_project
                     _spriteBatch.Draw(toppipeTexture, top, Color.White);
                 foreach (var bottom in bottomPipes)
                     _spriteBatch.Draw(bottompipeTexture, bottom, Color.White);
+                _spriteBatch.DrawString(scoreFont, "Score: " + score.ToString(), new Vector2(20, 20), Color.DarkGreen);
 
             }
             else if (screen == Screen.gameover)          
                     _spriteBatch.Draw(gameoverTexture, backgroundRect, Color.White);
+            
 
             _spriteBatch.End();
             // TODO: Add your drawing code here

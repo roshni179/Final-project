@@ -55,6 +55,9 @@
 /processorParam:Quality=Best
 /build:die.wav
 
+#begin FlappyFont.ttf
+/copy:FlappyFont.ttf
+
 #begin gold.webp
 /importer:TextureImporter
 /processor:TextureProcessor
