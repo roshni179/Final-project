@@ -74,7 +74,7 @@ namespace Final_project
 
         SoundEffect swooshEffect;
         SoundEffect dieEffect;
-        // SoundEffect collectEffect;
+        SoundEffect collectEffect;
         //SoundEffect currentaudioEffect;
 
         SpriteFont scoreFont;
@@ -88,17 +88,21 @@ namespace Final_project
         List<Rectangle> bottomPipes;
         List<Rectangle> feathers;
 
+        
+
         int feather = 0;
         float pipeSpeed = 3;
         int extralives = 0;
         float feathertimer = 0f;
         Random rand = new Random();
         int score;
+       
+        int featherscore;
         float pipetimer; // -> counting real time to spawn the pipes
        
         bool gameover = false;  
         bool collided = false;
-
+      
         MouseState mouseState;
         KeyboardState keyboardState, prevKeyboardState;
 
@@ -126,8 +130,7 @@ namespace Final_project
             birdRect = new Rectangle(100, 200, 40, 40);
             greySpeed = new Vector2(100, GraphicsDevice.Viewport.Height/2);
             //grey1Rect = new Rectangle(500, 150, 150, 150);
-            //pinkRect = new Rectangle(500, 150, 150, 150);
-            //pink1Rect = new Rectangle(500, 150, 150, 150);
+            
             greenpipeRect = new Rectangle(350,150,10,10);
             buttonRect = new Rectangle(229,295,210,65);
             restartRect = new Rectangle(34,296,194,53);
@@ -164,7 +167,7 @@ namespace Final_project
 
             swooshEffect = Content.Load<SoundEffect>("swoosh");
            dieEffect = Content.Load<SoundEffect>("die");
-            //collectEffect = Content.Load<SoundEffect>("goldcollect");
+            collectEffect = Content.Load<SoundEffect>("goldcollect");
             featherTexture = Content.Load<Texture2D>("gold");
             scoreFont = Content.Load<SpriteFont>("scoreFont");
 
@@ -190,7 +193,7 @@ namespace Final_project
                     currentbackgroundTexture = dayTexture;
                 }
             }
-
+             
 
             else if (screen == Screen.screen1)
             {
@@ -216,8 +219,8 @@ namespace Final_project
 
                     int pipeWidth = 40;
                     // space between top and bottom pipe
-                    int pipeStartY = 100;
-                    int pipeEndY = 250;
+                    int pipeStartY = 95;
+                    int pipeEndY = 200;
                     int gap = rand.Next(pipeStartY, pipeEndY);
                     int topPipeHeight = rand.Next(pipeStartY, pipeEndY);
 
@@ -228,10 +231,11 @@ namespace Final_project
                     bottomPipes.Add(bottomPipe);
                     pipetimer = 0f;
                 }
+                
 
                 feathertimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-                if (feathertimer >= 10f)
+                if (feathertimer >= 1f)
                 {
                     featherRect.X -= (int)pipeSpeed;
                     if (featherRect.Right < 0)
@@ -244,45 +248,61 @@ namespace Final_project
                         feather++;
                         featherRect.X = 800;
                         featherRect.Y = rand.Next(50, 350);
-
+                        featherscore = featherscore + 1;
+                      
+                        
+                        collectEffect.Play();
                         feathertimer = 0f;
-
                     }
-                 
+                }
+               
+
+                for (int i = topPipes.Count - 1; i >= 0; i--)
+                {
+                    Rectangle top = topPipes[i];
+                    Rectangle bottom = bottomPipes[i];
+                   
+                    top.X -= (int)pipeSpeed;
+                    bottom.X -= (int)pipeSpeed;
 
 
-                    for (int i = topPipes.Count - 1; i >= 0; i--)
+
+
+                    if (top.Right < 0)
                     {
-                        Rectangle top = topPipes[i];
-                        Rectangle bottom = bottomPipes[i];
-                        top.X -= (int)pipeSpeed;
-                        bottom.X -= (int)pipeSpeed;
 
 
-                        if (top.Right < 0)
+
+                        topPipes.RemoveAt(i);
+                        bottomPipes.RemoveAt(i);
+
+                        score = score + 1;
+                        if (score >= 3)
                         {
-                            topPipes.RemoveAt(i);
-                            bottomPipes.RemoveAt(i);
-
-                            score = score + 1;
+                            currentbackgroundTexture = nightTexture;
                         }
-                        else
-                        {
-                            topPipes[i] = top;
-                            bottomPipes[i] = bottom;
-                        }
-
-
-
 
                     }
+                    else
+                    {
+                        topPipes[i] = top;
+                        bottomPipes[i] = bottom;
+                    }
+                   
+                }
+               
 
 
-                    foreach (var top in topPipes)
+
+
+
+
+
+                foreach (var top in topPipes)
                     {
                         if (birdRect.Intersects(top))
                         {
-                            score = 0;
+                            //score = 0;
                             dieEffect.Play();
                             screen = Screen.gameover;
 
@@ -295,44 +315,44 @@ namespace Final_project
                     {
                         if (birdRect.Intersects(bottom))
                         {
-                            score = 0;
+                            //score = 0;
                             dieEffect.Play();
                             screen = Screen.gameover;
 
                         }
                     }
 
+            }
+            else if (screen == Screen.gameover)
+            {
+                if (mouseState.LeftButton == ButtonState.Pressed &&
+                        restartRect.Contains(mouseState.Position))
+                {
+                    screen = Screen.intro;
+                    pipetimer = 0f;
+
+
+
+                    topPipes.Clear();
+                    bottomPipes.Clear();
+                    score = 0;
+                    featherscore = 0;
                 }
-                else if (screen == Screen.gameover)
+                else
                 {
                     if (mouseState.LeftButton == ButtonState.Pressed &&
-                           restartRect.Contains(mouseState.Position))
+                        exitRect.Contains(mouseState.Position))
                     {
-                        screen = Screen.intro;
-                        pipetimer = 0f;
-
-
-
-                        topPipes.Clear();
-                        bottomPipes.Clear();
-
-
+                        Exit();
                     }
-                    else
-                    {
-                        if (mouseState.LeftButton == ButtonState.Pressed &&
-                            exitRect.Contains(mouseState.Position))
-                        {
-                            Exit();
-                        }
 
-                    }
                 }
-
             }
+            base.Update(gameTime);
+        }
 
-                base.Update(gameTime);
-            }
+                
+            
 
         protected override void Draw(GameTime gameTime)
         {
@@ -343,21 +363,28 @@ namespace Final_project
             else if (screen == Screen.screen1)
             {
 
-               
-             
-                    _spriteBatch.Draw(dayTexture, backgroundRect, Color.White);
 
-               
+
+                _spriteBatch.Draw(currentbackgroundTexture, backgroundRect, Color.White);
+
+
                 _spriteBatch.Draw(greybirdTexture, birdRect, Color.White);
                 foreach (var top in topPipes)
                     _spriteBatch.Draw(toppipeTexture, top, Color.White);
                 foreach (var bottom in bottomPipes)
                     _spriteBatch.Draw(bottompipeTexture, bottom, Color.White);
                 _spriteBatch.DrawString(scoreFont, "Score: " + score.ToString(), new Vector2(20, 20), Color.DarkGreen);
-
+                _spriteBatch.Draw(featherTexture, new Rectangle(450,20,40,40), Color.White);
+                _spriteBatch.DrawString(scoreFont, ": " + featherscore.ToString(), new Vector2(500, 20), Color.Gold);
+                _spriteBatch.Draw(featherTexture, featherRect, Color.White);
+                //_spriteBatch.Draw(nightTexture, backgroundRect, Color.White);
             }
-            else if (screen == Screen.gameover)          
-                    _spriteBatch.Draw(gameoverTexture, backgroundRect, Color.White);
+            else if (screen == Screen.gameover)
+            {
+                _spriteBatch.Draw(gameoverTexture, backgroundRect, Color.White);
+                _spriteBatch.DrawString(scoreFont, " Total Score: " + score, new Vector2(5, 20), Color.White);
+            }
+
             
 
             _spriteBatch.End();
